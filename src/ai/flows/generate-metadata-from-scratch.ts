@@ -32,17 +32,6 @@ const prompt = ai.definePrompt({
   - A Twitter title (should be similar to the title tag).
   - A Twitter description (should be similar to the meta description).
 
-  Provide the output in the following JSON format:
-  {
-    "titleTag": "Generated title tag",
-    "metaDescription": "Generated meta description",
-    "keywords": "keyword1, keyword2, keyword3",
-    "ogTitle": "Generated Open Graph title",
-    "ogDescription": "Generated Open Graph description",
-    "twitterTitle": "Generated Twitter title",
-    "twitterDescription": "Generated Twitter description"
-  }
-
   Website Description: {{{websiteDescription}}}
   `,
 });
@@ -55,6 +44,9 @@ const generateMetadataFromScratchFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("The AI failed to generate metadata. Please try again.");
+    }
+    return output;
   }
 );

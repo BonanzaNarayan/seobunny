@@ -31,13 +31,7 @@ const prompt = ai.definePrompt({
   Title Tag: {{{titleTag}}}
   Meta Description: {{{metaDescription}}}
   Keywords: {{{keywords}}}
-
-  Provide the optimized metadata in the following format:
-  {
-    "optimizedTitleTag": "Optimized title tag",
-    "optimizedMetaDescription": "Optimized meta description",
-    "optimizedKeywords": "Optimized keywords"
-  }`,
+`,
 });
 
 const optimizeMetadataFlow = ai.defineFlow(
@@ -48,6 +42,9 @@ const optimizeMetadataFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("The AI failed to generate optimized metadata. Please try again.");
+    }
+    return output;
   }
 );
