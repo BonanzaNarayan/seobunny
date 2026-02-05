@@ -1,0 +1,140 @@
+'use client';
+
+import { useState } from 'react';
+import { Sparkles, FileJson, Download } from 'lucide-react';
+import type { AnalysisResult } from '@/lib/types';
+import type { OptimizeMetadataOutput } from '@/ai/flows/optimize-existing-metadata';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CopyButton } from './copy-button';
+import { formatAsHtml, formatAsNextJs } from '@/lib/metadata-utils';
+import { OptimizationSkeleton } from './result-skeletons';
+import { useToast } from '@/hooks/use-toast';
+
+interface MetadataDisplayProps {
+  analysisResult: AnalysisResult;
+  onOptimize: (input: { title: string; description: string; keywords: string; }) => Promise<OptimizeMetadataOutput | undefined>;
+}
+
+export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayProps) {
+  const [optimizedResult, setOptimizedResult] = useState<OptimizeMetadataOutput | undefined>(undefined);
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const { toast } = useToast();
+
+  const handleOptimizeClick = async () => {
+    setIsOptimizing(true);
+    const result = await onOptimize({
+      title: analysisResult.title || '',
+      description: analysisResult.description || '',
+      keywords: analysisResult.keywords || '',
+    });
+    setOptimizedResult(result);
+    setIsOptimizing(false);
+  };
+
+  const handleExportJson = () => {
+    const html = formatAsHtml(analysisResult, optimizedResult);
+    const nextjs = formatAsNextJs(analysisResult, optimizedResult);
+    const data = {
+        html,
+        nextjs,
+        original: analysisResult,
+        optimized: optimizedResult
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'metadata.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  const handleExportPdf = () => {
+    toast({
+        title: 'Coming Soon!',
+        description: 'PDF export functionality is under development.'
+    })
+  }
+
+  const htmlCode = formatAsHtml(analysisResult, optimizedResult);
+  const nextjsCode = formatAsNextJs(analysisResult, optimizedResult);
+
+  const renderMetadataList = (data: AnalysisResult) => (
+    <ul className="space-y-3 text-sm">
+      {Object.entries(data).map(([key, value]) => value && (
+        <li key={key} className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
+          <span className="font-semibold text-muted-foreground capitalize w-40 shrink-0">{key.replace(/([A-Z])/g, ' $1')}</span>
+          <span className="text-foreground break-all">{value}</span>
+        </li>
+      ))}
+    </ul>
+  );
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Analyzed Metadata</CardTitle>
+          <CardDescription>This is the metadata we found at the provided URL.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            {renderMetadataList(analysisResult)}
+        </CardContent>
+      </Card>
+
+      <div className="text-center">
+        <Button size="lg" onClick={handleOptimizeClick} disabled={isOptimizing}>
+          <Sparkles className="mr-2 h-5 w-5" />
+          {isOptimizing ? 'Optimizing with AI...' : 'Optimize with AI'}
+        </Button>
+      </div>
+
+      {(isOptimizing || optimizedResult) && (
+        <Card className="animate-in fade-in-50">
+          <CardHeader>
+            <CardTitle>AI-Optimized Metadata</CardTitle>
+            <CardDescription>
+              Copy the optimized metadata in your preferred format. We've enhanced it for SEO performance.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isOptimizing ? <OptimizationSkeleton /> : (
+              <Tabs defaultValue="nextjs">
+                <div className="flex justify-between items-center mb-4">
+                  <TabsList>
+                    <TabsTrigger value="nextjs">Next.js</TabsTrigger>
+                    <TabsTrigger value="html">HTML</TabsTrigger>
+                  </TabsList>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={handleExportJson}>
+                        <FileJson className="mr-2 h-4 w-4" /> Export JSON
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleExportPdf}>
+                        <Download className="mr-2 h-4 w-4" /> Export PDF
+                    </Button>
+                  </div>
+                </div>
+                <TabsContent value="nextjs">
+                  <div className="relative rounded-md bg-muted/50 p-4 font-code text-sm">
+                    <CopyButton textToCopy={nextjsCode} className="absolute top-2 right-2" />
+                    <pre className="whitespace-pre-wrap break-all"><code>{nextjsCode}</code></pre>
+                  </div>
+                </TabsContent>
+                <TabsContent value="html">
+                  <div className="relative rounded-md bg-muted/50 p-4 font-code text-sm">
+                    <CopyButton textToCopy={htmlCode} className="absolute top-2 right-2" />
+                    <pre className="whitespace-pre-wrap break-all"><code>{htmlCode}</code></pre>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
