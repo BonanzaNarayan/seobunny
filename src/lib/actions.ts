@@ -1,12 +1,12 @@
 'use server';
 
 import { z } from 'zod';
-import { optimizeMetadata } from '@/ai/flows/optimize-existing-metadata';
-import { generateMetadataFromScratch } from '@/ai/flows/generate-metadata-from-scratch';
 import { rateSeo } from '@/ai/flows/rate-seo-flow';
 import { parseMetadata } from '@/lib/metadata-utils';
 import type { AnalysisState, GenerateState } from '@/lib/types';
-import type { GenerateMetadataFromScratchInput, OptimizeMetadataInput } from '@/ai/schemas';
+import type { GenerateMetadataFromScratchInput, GenerateAndRateMetadataOutput, OptimizeMetadataInput, OptimizeAndRateMetadataOutput } from '@/ai/schemas';
+import { generateAndRateMetadata } from '@/ai/flows/generate-and-rate-metadata';
+import { optimizeAndRateMetadata } from '@/ai/flows/optimize-and-rate-metadata';
 
 const UrlSchema = z.string().url({ message: 'Please enter a valid URL.' });
 
@@ -62,13 +62,29 @@ export async function analyzeUrl(
 export async function optimizeMetadataAction(
   input: OptimizeMetadataInput
 ) {
-  const optimizedResult = await optimizeMetadata(input);
-  const rating = await rateSeo({
-    title: optimizedResult.optimizedTitleTag,
-    description: optimizedResult.optimizedMetaDescription,
-    keywords: optimizedResult.optimizedKeywords,
-  });
-  return { optimizedResult, rating };
+  try {
+    const result: OptimizeAndRateMetadataOutput = await optimizeAndRateMetadata(input);
+    
+    const optimizedResult = {
+      optimizedTitleTag: result.optimizedTitleTag,
+      optimizedMetaDescription: result.optimizedMetaDescription,
+      optimizedKeywords: result.optimizedKeywords,
+    };
+
+    const rating = {
+      score: result.score,
+      rating: result.rating,
+      feedback: result.feedback,
+    };
+    
+    return { optimizedResult, rating };
+  } catch (e) {
+    console.error("Optimization failed in action", e);
+    if (e instanceof Error) {
+        throw new Error(e.message);
+    }
+    throw new Error('An unexpected error occurred during optimization.');
+  }
 }
 
 
@@ -85,12 +101,23 @@ export async function generateMetadataFromScratchAction(
     
     const input: GenerateMetadataFromScratchInput = { websiteDescription };
 
-    const metadata = await generateMetadataFromScratch(input);
-    const rating = await rateSeo({
-      title: metadata.titleTag,
-      description: metadata.metaDescription,
-      keywords: metadata.keywords,
-    });
+    const result: GenerateAndRateMetadataOutput = await generateAndRateMetadata(input);
+
+    const metadata = {
+        titleTag: result.titleTag,
+        metaDescription: result.metaDescription,
+        keywords: result.keywords,
+        ogTitle: result.ogTitle,
+        ogDescription: result.ogDescription,
+        twitterTitle: result.twitterTitle,
+        twitterDescription: result.twitterDescription,
+    };
+    const rating = {
+        score: result.score,
+        rating: result.rating,
+        feedback: result.feedback,
+    };
+
     return { data: { metadata, rating } };
   } catch(e) {
     console.error(e);

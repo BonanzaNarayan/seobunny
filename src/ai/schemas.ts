@@ -56,3 +56,36 @@ export const RateSeoOutputSchema = z.object({
   feedback: z.string().describe('Actionable feedback to improve the SEO score.'),
 });
 export type RateSeoOutput = z.infer<typeof RateSeoOutputSchema>;
+
+
+export const OptimizeAndRateMetadataOutputSchema = z.object({
+  optimizedTitleTag: z.string().describe('The optimized title tag.'),
+  optimizedMetaDescription: z
+    .string()
+    .describe('The optimized meta description.'),
+  optimizedKeywords: z.string().describe('The optimized keywords.'),
+  score: z.number().min(0).max(100).describe('The SEO score from 0 to 100 for the OPTIMIZED metadata.'),
+  rating: z
+    .string()
+    .describe('A one-word rating like "Excellent", "Good", "Average", "Poor" for the OPTIMIZED metadata.'),
+  feedback: z.string().describe('Actionable feedback to improve the SEO score of the OPTIMIZED metadata.'),
+});
+export type OptimizeAndRateMetadataOutput = z.infer<typeof OptimizeAndRateMetadataOutputSchema>;
+
+export const GenerateAndRateMetadataOutputSchema = z.object({
+  titleTag: z.string().describe('The generated title tag.'),
+  metaDescription: z.string().describe('The generated meta description.'),
+  keywords: z.string().describe('A comma-separated list of relevant keywords.'),
+  ogTitle: z.string().describe('The generated Open Graph title.'),
+  ogDescription: z.string().describe('The generated Open Graph description.'),
+  twitterTitle: z.string().describe('The generated Twitter title.'),
+  twitterDescription: z.string().describe('The generated Twitter description.'),
+  score: z.number().min(0).max(100).describe('The SEO score from 0 to 100 for the generated metadata.'),
+  rating: z
+    .string()
+    .describe('A one-word rating like "Excellent", "Good", "Average", "Poor" for the generated metadata.'),
+  feedback: z.string().describe('Actionable feedback to improve the SEO score of the generated metadata.'),
+});
+export type GenerateAndRateMetadataOutput = z.infer<
+  typeof GenerateAndRateMetadataOutputSchema
+>;
