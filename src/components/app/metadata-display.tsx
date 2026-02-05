@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -11,6 +12,7 @@ import { CopyButton } from './copy-button';
 import { formatAsHtml, formatAsNextJs } from '@/lib/metadata-utils';
 import { OptimizationSkeleton } from './result-skeletons';
 import { useToast } from '@/hooks/use-toast';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 interface MetadataDisplayProps {
   analysisResult: AnalysisResult;
@@ -75,66 +77,68 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
   );
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Analyzed Metadata</CardTitle>
-          <CardDescription>This is the metadata we found at the provided URL.</CardDescription>
-        </CardHeader>
-        <CardContent>
-            {renderMetadataList(analysisResult)}
-        </CardContent>
-      </Card>
-
-      <div className="text-center">
-        <Button size="lg" onClick={handleOptimizeClick} disabled={isOptimizing}>
-          <Sparkles className="mr-2 h-5 w-5" />
-          {isOptimizing ? 'Optimizing with AI...' : 'Optimize with AI'}
-        </Button>
-      </div>
-
-      {(isOptimizing || optimizedResult) && (
-        <Card className="animate-in fade-in-50">
-          <CardHeader>
-            <CardTitle>AI-Optimized Metadata</CardTitle>
-            <CardDescription>
-              Copy the optimized metadata in your preferred format. We've enhanced it for SEO performance.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isOptimizing ? <OptimizationSkeleton /> : (
-              <Tabs defaultValue="nextjs">
-                <div className="flex justify-between items-center mb-4">
-                  <TabsList>
-                    <TabsTrigger value="nextjs">Next.js</TabsTrigger>
-                    <TabsTrigger value="html">HTML</TabsTrigger>
-                  </TabsList>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={handleExportJson}>
-                        <FileJson className="mr-2 h-4 w-4" /> Export JSON
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={handleExportPdf}>
-                        <Download className="mr-2 h-4 w-4" /> Export PDF
-                    </Button>
-                  </div>
-                </div>
-                <TabsContent value="nextjs">
-                  <div className="relative rounded-md bg-muted/50 p-4 font-code text-sm">
-                    <CopyButton textToCopy={nextjsCode} className="absolute top-2 right-2" />
-                    <pre className="whitespace-pre-wrap break-all"><code>{nextjsCode}</code></pre>
-                  </div>
-                </TabsContent>
-                <TabsContent value="html">
-                  <div className="relative rounded-md bg-muted/50 p-4 font-code text-sm">
-                    <CopyButton textToCopy={htmlCode} className="absolute top-2 right-2" />
-                    <pre className="whitespace-pre-wrap break-all"><code>{htmlCode}</code></pre>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            )}
-          </CardContent>
+    <TooltipProvider>
+        <div className="space-y-6">
+        <Card>
+            <CardHeader>
+            <CardTitle>Analyzed Metadata</CardTitle>
+            <CardDescription>This is the metadata we found at the provided URL.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {renderMetadataList(analysisResult)}
+            </CardContent>
         </Card>
-      )}
-    </div>
+
+        <div className="text-center">
+            <Button size="lg" onClick={handleOptimizeClick} disabled={isOptimizing}>
+            <Sparkles className="mr-2 h-5 w-5" />
+            {isOptimizing ? 'Optimizing with AI...' : 'Optimize with AI'}
+            </Button>
+        </div>
+
+        {(isOptimizing || optimizedResult) && (
+            <Card className="animate-in fade-in-50">
+            <CardHeader>
+                <CardTitle>AI-Optimized Metadata</CardTitle>
+                <CardDescription>
+                Copy the optimized metadata in your preferred format. We've enhanced it for SEO performance.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                {isOptimizing ? <OptimizationSkeleton /> : (
+                <Tabs defaultValue="nextjs">
+                    <div className="flex justify-between items-center mb-4">
+                    <TabsList>
+                        <TabsTrigger value="nextjs">Next.js</TabsTrigger>
+                        <TabsTrigger value="html">HTML</TabsTrigger>
+                    </TabsList>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={handleExportJson}>
+                            <FileJson className="mr-2 h-4 w-4" /> Export JSON
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={handleExportPdf}>
+                            <Download className="mr-2 h-4 w-4" /> Export PDF
+                        </Button>
+                    </div>
+                    </div>
+                    <TabsContent value="nextjs">
+                    <div className="relative rounded-md bg-muted/50 p-4 font-code text-sm">
+                        <CopyButton textToCopy={nextjsCode} className="absolute top-2 right-2" />
+                        <pre className="whitespace-pre-wrap break-all"><code>{nextjsCode}</code></pre>
+                    </div>
+                    </TabsContent>
+                    <TabsContent value="html">
+                    <div className="relative rounded-md bg-muted/50 p-4 font-code text-sm">
+                        <CopyButton textToCopy={htmlCode} className="absolute top-2 right-2" />
+                        <pre className="whitespace-pre-wrap break-all"><code>{htmlCode}</code></pre>
+                    </div>
+                    </TabsContent>
+                </Tabs>
+                )}
+            </CardContent>
+            </Card>
+        )}
+        </div>
+    </TooltipProvider>
   );
 }
