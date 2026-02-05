@@ -24,9 +24,7 @@ const prompt = ai.definePrompt({
   name: 'optimizeMetadataPrompt',
   input: {schema: OptimizeMetadataInputSchema},
   output: {schema: OptimizeMetadataOutputSchema},
-  prompt: `You are an SEO expert tasked with optimizing existing metadata for improved search engine rankings.
-
-  Please rewrite the following metadata to be more clear, compelling, and keyword-rich.
+  prompt: `You are an SEO expert. Optimize the following metadata for improved search engine rankings.
 
   Title Tag: {{{titleTag}}}
   Meta Description: {{{metaDescription}}}

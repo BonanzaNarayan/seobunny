@@ -23,14 +23,7 @@ const prompt = ai.definePrompt({
   name: 'generateMetadataFromScratchPrompt',
   input: {schema: GenerateMetadataFromScratchInputSchema},
   output: {schema: GenerateMetadataFromScratchOutputSchema},
-  prompt: `You are an SEO expert. Based on the following website description, please generate the following metadata:
-  - A compelling title tag.
-  - A concise and engaging meta description.
-  - A comma-separated list of relevant keywords.
-  - An Open Graph title (should be similar to the title tag).
-  - An Open Graph description (should be similar to the meta description).
-  - A Twitter title (should be similar to the title tag).
-  - A Twitter description (should be similar to the meta description).
+  prompt: `You are an SEO expert. Generate comprehensive SEO metadata based on the provided website description.
 
   Website Description: {{{websiteDescription}}}
   `,

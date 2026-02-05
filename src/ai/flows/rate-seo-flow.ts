@@ -21,13 +21,7 @@ const prompt = ai.definePrompt({
   name: 'rateSeoPrompt',
   input: {schema: RateSeoInputSchema},
   output: {schema: RateSeoOutputSchema},
-  prompt: `You are an SEO expert. Analyze the following metadata and provide a score from 0 to 100, a one-word rating (e.g., Poor, Average, Good, Excellent), and concise, actionable feedback for improvement.
-
-  Factors to consider for scoring:
-  - Title length (50-60 characters is ideal).
-  - Description length (150-160 characters is ideal).
-  - Keyword presence and relevance in title and description.
-  - Compelling and clickable language.
+  prompt: `You are an SEO expert. Analyze the following metadata and provide an SEO score, a one-word rating, and concise, actionable feedback for improvement.
 
   Metadata:
   Title: {{{title}}}
