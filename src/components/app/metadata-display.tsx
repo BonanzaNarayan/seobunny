@@ -35,20 +35,31 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
     setIsOptimizing(false);
   };
 
-  const handleExportJson = () => {
-    const html = formatAsHtml(analysisResult, optimizedResult);
-    const nextjs = formatAsNextJs(analysisResult, optimizedResult);
-    const data = {
-        html,
-        nextjs,
-        original: analysisResult,
-        optimized: optimizedResult
-    };
+  const handleExportJson = (forOptimized: boolean) => {
+    let data;
+    if (forOptimized && optimizedResult) {
+        const html = formatAsHtml(analysisResult, optimizedResult);
+        const nextjs = formatAsNextJs(analysisResult, optimizedResult);
+        data = {
+            html,
+            nextjs,
+            original: analysisResult,
+            optimized: optimizedResult
+        };
+    } else {
+        const html = formatAsHtml(analysisResult);
+        const nextjs = formatAsNextJs(analysisResult);
+        data = {
+            html,
+            nextjs,
+            original: analysisResult,
+        };
+    }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'metadata.json';
+    a.download = forOptimized ? 'optimized-metadata.json' : 'metadata.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -62,10 +73,13 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
     })
   }
 
-  const htmlCode = formatAsHtml(analysisResult, optimizedResult);
-  const nextjsCode = formatAsNextJs(analysisResult, optimizedResult);
+  const originalHtmlCode = formatAsHtml(analysisResult);
+  const originalNextJsCode = formatAsNextJs(analysisResult);
+  
+  const optimizedHtmlCode = formatAsHtml(analysisResult, optimizedResult);
+  const optimizedNextJsCode = formatAsNextJs(analysisResult, optimizedResult);
 
-  const renderMetadataList = (data: AnalysisResult) => (
+  const renderMetadataList = (data: Record<string, any>) => (
     <ul className="space-y-3 text-sm">
       {Object.entries(data).map(([key, value]) => value && (
         <li key={key} className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
@@ -75,6 +89,13 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
       ))}
     </ul>
   );
+  
+  const optimizedListData = optimizedResult ? {
+    title: optimizedResult.optimizedTitleTag,
+    description: optimizedResult.optimizedMetaDescription,
+    keywords: optimizedResult.optimizedKeywords,
+  } : {};
+
 
   return (
     <TooltipProvider>
@@ -85,7 +106,38 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
             <CardDescription>This is the metadata we found at the provided URL.</CardDescription>
             </CardHeader>
             <CardContent>
-                {renderMetadataList(analysisResult)}
+                <Tabs defaultValue="list">
+                    <div className="flex justify-between items-center mb-4">
+                    <TabsList>
+                        <TabsTrigger value="list">List</TabsTrigger>
+                        <TabsTrigger value="nextjs">Next.js</TabsTrigger>
+                        <TabsTrigger value="html">HTML</TabsTrigger>
+                    </TabsList>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleExportJson(false)}>
+                            <FileJson className="mr-2 h-4 w-4" /> Export JSON
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={handleExportPdf}>
+                            <Download className="mr-2 h-4 w-4" /> Export PDF
+                        </Button>
+                    </div>
+                    </div>
+                    <TabsContent value="list">
+                        {renderMetadataList(analysisResult)}
+                    </TabsContent>
+                    <TabsContent value="nextjs">
+                        <div className="relative rounded-md bg-muted/50 p-4 font-code text-sm">
+                            <CopyButton textToCopy={originalNextJsCode} className="absolute top-2 right-2" />
+                            <pre className="whitespace-pre-wrap break-all"><code>{originalNextJsCode}</code></pre>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="html">
+                        <div className="relative rounded-md bg-muted/50 p-4 font-code text-sm">
+                            <CopyButton textToCopy={originalHtmlCode} className="absolute top-2 right-2" />
+                            <pre className="whitespace-pre-wrap break-all"><code>{originalHtmlCode}</code></pre>
+                        </div>
+                    </TabsContent>
+                </Tabs>
             </CardContent>
         </Card>
 
@@ -106,14 +158,15 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
             </CardHeader>
             <CardContent>
                 {isOptimizing ? <OptimizationSkeleton /> : (
-                <Tabs defaultValue="nextjs">
+                <Tabs defaultValue="list">
                     <div className="flex justify-between items-center mb-4">
                     <TabsList>
+                        <TabsTrigger value="list">List</TabsTrigger>
                         <TabsTrigger value="nextjs">Next.js</TabsTrigger>
                         <TabsTrigger value="html">HTML</TabsTrigger>
                     </TabsList>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={handleExportJson}>
+                        <Button variant="outline" size="sm" onClick={() => handleExportJson(true)}>
                             <FileJson className="mr-2 h-4 w-4" /> Export JSON
                         </Button>
                         <Button variant="outline" size="sm" onClick={handleExportPdf}>
@@ -121,16 +174,19 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
                         </Button>
                     </div>
                     </div>
+                    <TabsContent value="list">
+                        {renderMetadataList(optimizedListData)}
+                    </TabsContent>
                     <TabsContent value="nextjs">
                     <div className="relative rounded-md bg-muted/50 p-4 font-code text-sm">
-                        <CopyButton textToCopy={nextjsCode} className="absolute top-2 right-2" />
-                        <pre className="whitespace-pre-wrap break-all"><code>{nextjsCode}</code></pre>
+                        <CopyButton textToCopy={optimizedNextJsCode} className="absolute top-2 right-2" />
+                        <pre className="whitespace-pre-wrap break-all"><code>{optimizedNextJsCode}</code></pre>
                     </div>
                     </TabsContent>
                     <TabsContent value="html">
                     <div className="relative rounded-md bg-muted/50 p-4 font-code text-sm">
-                        <CopyButton textToCopy={htmlCode} className="absolute top-2 right-2" />
-                        <pre className="whitespace-pre-wrap break-all"><code>{htmlCode}</code></pre>
+                        <CopyButton textToCopy={optimizedHtmlCode} className="absolute top-2 right-2" />
+                        <pre className="whitespace-pre-wrap break-all"><code>{optimizedHtmlCode}</code></pre>
                     </div>
                     </TabsContent>
                 </Tabs>
