@@ -10,15 +10,21 @@ import { MetadataDisplay } from './metadata-display';
 import type { AnalysisState } from '@/lib/types';
 import { ResultSkeleton } from './result-skeletons';
 import type { OptimizeMetadataOutput } from '@/ai/flows/optimize-existing-metadata';
+import type { RateSeoOutput } from '@/ai/flows/rate-seo-flow';
 import { CardContent, CardFooter } from '../ui/card';
 
 const initialState: AnalysisState = {};
+
+type OptimizationResult = {
+  optimizedResult: OptimizeMetadataOutput;
+  rating: RateSeoOutput;
+};
 
 export function Analyzer() {
   const [state, formAction, isPending] = useActionState(analyzeUrl, initialState);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const handleOptimize = async (input: { title: string, description: string, keywords: string }): Promise<OptimizeMetadataOutput | undefined> => {
+  const handleOptimize = async (input: { title: string, description: string, keywords: string }): Promise<OptimizationResult | undefined> => {
     try {
         const result = await optimizeMetadataAction({
             titleTag: input.title,

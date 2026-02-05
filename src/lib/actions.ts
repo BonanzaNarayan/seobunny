@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { optimizeMetadata, type OptimizeMetadataInput } from '@/ai/flows/optimize-existing-metadata';
 import { generateMetadataFromScratch, type GenerateMetadataFromScratchInput } from '@/ai/flows/generate-metadata-from-scratch';
+import { rateSeo } from '@/ai/flows/rate-seo-flow';
 import { parseMetadata } from '@/lib/metadata-utils';
 import type { AnalysisState, GenerateState } from '@/lib/types';
 
@@ -37,6 +38,15 @@ export async function analyzeUrl(
 
     const html = await response.text();
     const metadata = parseMetadata(html);
+
+    if (metadata.title && metadata.description) {
+      const rating = await rateSeo({
+        title: metadata.title,
+        description: metadata.description,
+        keywords: metadata.keywords || '',
+      });
+      return { data: { ...metadata, rating } };
+    }
     
     return { data: metadata };
   } catch (e) {
@@ -50,9 +60,14 @@ export async function analyzeUrl(
 
 export async function optimizeMetadataAction(
   input: OptimizeMetadataInput
-): Promise<ReturnType<typeof optimizeMetadata>> {
-  // Add validation here if needed
-  return await optimizeMetadata(input);
+) {
+  const optimizedResult = await optimizeMetadata(input);
+  const rating = await rateSeo({
+    title: optimizedResult.optimizedTitleTag,
+    description: optimizedResult.optimizedMetaDescription,
+    keywords: optimizedResult.optimizedKeywords,
+  });
+  return { optimizedResult, rating };
 }
 
 
@@ -69,8 +84,13 @@ export async function generateMetadataFromScratchAction(
   const input: GenerateMetadataFromScratchInput = { websiteDescription };
 
   try {
-    const result = await generateMetadataFromScratch(input);
-    return { data: result };
+    const metadata = await generateMetadataFromScratch(input);
+    const rating = await rateSeo({
+      title: metadata.titleTag,
+      description: metadata.metaDescription,
+      keywords: metadata.keywords,
+    });
+    return { data: { metadata, rating } };
   } catch(e) {
     console.error(e);
     return { error: 'Failed to generate metadata. Please try again.' };

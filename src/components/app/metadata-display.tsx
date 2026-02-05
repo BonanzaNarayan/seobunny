@@ -1,10 +1,10 @@
-
 'use client';
 
 import { useState } from 'react';
 import { Sparkles, FileJson, Download } from 'lucide-react';
 import type { AnalysisResult } from '@/lib/types';
 import type { OptimizeMetadataOutput } from '@/ai/flows/optimize-existing-metadata';
+import type { RateSeoOutput } from '@/ai/flows/rate-seo-flow';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,39 +13,54 @@ import { formatAsHtml, formatAsNextJs } from '@/lib/metadata-utils';
 import { OptimizationSkeleton } from './result-skeletons';
 import { useToast } from '@/hooks/use-toast';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { ScoreDisplay } from './score-display';
+
+type OptimizationResult = {
+  optimizedResult: OptimizeMetadataOutput;
+  rating: RateSeoOutput;
+};
 
 interface MetadataDisplayProps {
   analysisResult: AnalysisResult;
-  onOptimize?: (input: { title: string; description: string; keywords: string; }) => Promise<OptimizeMetadataOutput | undefined>;
+  onOptimize?: (input: { title: string; description: string; keywords: string; }) => Promise<OptimizationResult | undefined>;
 }
 
 export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayProps) {
-  const [optimizedResult, setOptimizedResult] = useState<OptimizeMetadataOutput | undefined>(undefined);
+  const [optimizedMetadata, setOptimizedMetadata] = useState<OptimizeMetadataOutput | undefined>(undefined);
+  const [optimizedRating, setOptimizedRating] = useState<RateSeoOutput | undefined>(undefined);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const { toast } = useToast();
 
   const handleOptimizeClick = async () => {
     if (!onOptimize) return;
     setIsOptimizing(true);
+    setOptimizedMetadata(undefined);
+    setOptimizedRating(undefined);
     const result = await onOptimize({
       title: analysisResult.title || '',
       description: analysisResult.description || '',
       keywords: analysisResult.keywords || '',
     });
-    setOptimizedResult(result);
+    if (result) {
+      setOptimizedMetadata(result.optimizedResult);
+      setOptimizedRating(result.rating);
+    }
     setIsOptimizing(false);
   };
 
   const handleExportJson = (forOptimized: boolean) => {
     let data;
-    if (forOptimized && optimizedResult) {
-        const html = formatAsHtml(analysisResult, optimizedResult);
-        const nextjs = formatAsNextJs(analysisResult, optimizedResult);
+    if (forOptimized && optimizedMetadata) {
+        const html = formatAsHtml(analysisResult, optimizedMetadata);
+        const nextjs = formatAsNextJs(analysisResult, optimizedMetadata);
         data = {
             html,
             nextjs,
             original: analysisResult,
-            optimized: optimizedResult
+            optimized: {
+              ...optimizedMetadata,
+              rating: optimizedRating,
+            }
         };
     } else {
         const html = formatAsHtml(analysisResult);
@@ -77,12 +92,12 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
   const originalHtmlCode = formatAsHtml(analysisResult);
   const originalNextJsCode = formatAsNextJs(analysisResult);
   
-  const optimizedHtmlCode = formatAsHtml(analysisResult, optimizedResult);
-  const optimizedNextJsCode = formatAsNextJs(analysisResult, optimizedResult);
+  const optimizedHtmlCode = formatAsHtml(analysisResult, optimizedMetadata);
+  const optimizedNextJsCode = formatAsNextJs(analysisResult, optimizedMetadata);
 
   const renderMetadataList = (data: Record<string, any>) => (
     <ul className="space-y-3 text-sm">
-      {Object.entries(data).map(([key, value]) => value && (
+      {Object.entries(data).map(([key, value]) => (value && typeof value !== 'object') && (
         <li key={key} className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
           <span className="font-semibold text-muted-foreground capitalize w-40 shrink-0">{key.replace(/([A-Z])/g, ' $1')}</span>
           <span className="text-foreground break-all">{value}</span>
@@ -91,20 +106,29 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
     </ul>
   );
   
-  const optimizedListData = optimizedResult ? {
-    title: optimizedResult.optimizedTitleTag,
-    description: optimizedResult.optimizedMetaDescription,
-    keywords: optimizedResult.optimizedKeywords,
+  const optimizedListData = optimizedMetadata ? {
+    title: optimizedMetadata.optimizedTitleTag,
+    description: optimizedMetadata.optimizedMetaDescription,
+    keywords: optimizedMetadata.optimizedKeywords,
   } : {};
 
 
   return (
     <TooltipProvider>
         <div className="space-y-6">
+
+        {analysisResult.rating && (
+            <ScoreDisplay 
+                score={analysisResult.rating.score}
+                rating={analysisResult.rating.rating}
+                feedback={analysisResult.rating.feedback}
+            />
+        )}
+
         <Card>
             <CardHeader>
-            <CardTitle>Generated Metadata</CardTitle>
-            <CardDescription>This is the metadata generated by the AI based on your prompt.</CardDescription>
+            <CardTitle>{onOptimize ? "Analyzed Metadata" : "Generated Metadata"}</CardTitle>
+            <CardDescription>{onOptimize ? "This is the metadata scraped from the URL." : "This is the metadata generated by the AI based on your prompt."}</CardDescription>
             </CardHeader>
             <CardContent>
                 <Tabs defaultValue="list">
@@ -151,51 +175,60 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
             </div>
         )}
 
-        {(isOptimizing || optimizedResult) && (
-            <Card className="animate-in fade-in-50">
-            <CardHeader>
-                <CardTitle>AI-Optimized Metadata</CardTitle>
-                <CardDescription>
-                Copy the optimized metadata in your preferred format. We've enhanced it for SEO performance.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                {isOptimizing ? <OptimizationSkeleton /> : (
-                <Tabs defaultValue="list">
-                    <div className="flex justify-between items-center mb-4">
-                    <TabsList>
-                        <TabsTrigger value="list">List</TabsTrigger>
-                        <TabsTrigger value="nextjs">Next.js</TabsTrigger>
-                        <TabsTrigger value="html">HTML</TabsTrigger>
-                    </TabsList>
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={() => handleExportJson(true)}>
-                            <FileJson className="mr-2 h-4 w-4" /> Export JSON
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={handleExportPdf}>
-                            <Download className="mr-2 h-4 w-4" /> Export PDF
-                        </Button>
-                    </div>
-                    </div>
-                    <TabsContent value="list">
-                        {renderMetadataList(optimizedListData)}
-                    </TabsContent>
-                    <TabsContent value="nextjs">
-                    <div className="relative rounded-md bg-muted/20 p-4 font-code text-sm">
-                        <CopyButton textToCopy={optimizedNextJsCode} className="absolute top-2 right-2" />
-                        <pre className="whitespace-pre-wrap break-all"><code>{optimizedNextJsCode}</code></pre>
-                    </div>
-                    </TabsContent>
-                    <TabsContent value="html">
-                    <div className="relative rounded-md bg-muted/20 p-4 font-code text-sm">
-                        <CopyButton textToCopy={optimizedHtmlCode} className="absolute top-2 right-2" />
-                        <pre className="whitespace-pre-wrap break-all"><code>{optimizedHtmlCode}</code></pre>
-                    </div>
-                    </TabsContent>
-                </Tabs>
+        {isOptimizing && <OptimizationSkeleton />}
+
+        {!isOptimizing && optimizedMetadata && (
+            <div className="space-y-6 animate-in fade-in-50">
+                {optimizedRating && (
+                    <ScoreDisplay 
+                        score={optimizedRating.score}
+                        rating={optimizedRating.rating}
+                        feedback={optimizedRating.feedback}
+                    />
                 )}
-            </CardContent>
-            </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>AI-Optimized Metadata</CardTitle>
+                        <CardDescription>
+                        Copy the optimized metadata in your preferred format. We've enhanced it for SEO performance.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Tabs defaultValue="list">
+                            <div className="flex justify-between items-center mb-4">
+                            <TabsList>
+                                <TabsTrigger value="list">List</TabsTrigger>
+                                <TabsTrigger value="nextjs">Next.js</TabsTrigger>
+                                <TabsTrigger value="html">HTML</TabsTrigger>
+                            </TabsList>
+                            <div className="flex items-center gap-2">
+                                <Button variant="outline" size="sm" onClick={() => handleExportJson(true)}>
+                                    <FileJson className="mr-2 h-4 w-4" /> Export JSON
+                                </Button>
+                                <Button variant="outline" size="sm" onClick={handleExportPdf}>
+                                    <Download className="mr-2 h-4 w-4" /> Export PDF
+                                </Button>
+                            </div>
+                            </div>
+                            <TabsContent value="list">
+                                {renderMetadataList(optimizedListData)}
+                            </TabsContent>
+                            <TabsContent value="nextjs">
+                            <div className="relative rounded-md bg-muted/20 p-4 font-code text-sm">
+                                <CopyButton textToCopy={optimizedNextJsCode} className="absolute top-2 right-2" />
+                                <pre className="whitespace-pre-wrap break-all"><code>{optimizedNextJsCode}</code></pre>
+                            </div>
+                            </TabsContent>
+                            <TabsContent value="html">
+                            <div className="relative rounded-md bg-muted/20 p-4 font-code text-sm">
+                                <CopyButton textToCopy={optimizedHtmlCode} className="absolute top-2 right-2" />
+                                <pre className="whitespace-pre-wrap break-all"><code>{optimizedHtmlCode}</code></pre>
+                            </div>
+                            </TabsContent>
+                        </Tabs>
+                    </CardContent>
+                </Card>
+            </div>
         )}
         </div>
     </TooltipProvider>

@@ -19,13 +19,14 @@ export function Builder() {
   const formRef = useRef<HTMLFormElement>(null);
 
   const generatedDataAsAnalysisResult: AnalysisResult | null = state.data ? {
-    title: state.data.titleTag,
-    description: state.data.metaDescription,
-    keywords: state.data.keywords,
-    ogTitle: state.data.ogTitle,
-    ogDescription: state.data.ogDescription,
-    twitterTitle: state.data.twitterTitle,
-    twitterDescription: state.data.twitterDescription,
+    title: state.data.metadata.titleTag,
+    description: state.data.metadata.metaDescription,
+    keywords: state.data.metadata.keywords,
+    ogTitle: state.data.metadata.ogTitle,
+    ogDescription: state.data.metadata.ogDescription,
+    twitterTitle: state.data.metadata.twitterTitle,
+    twitterDescription: state.data.metadata.twitterDescription,
+    rating: state.data.rating,
     ogImage: null,
     ogUrl: null,
     ogType: null,
