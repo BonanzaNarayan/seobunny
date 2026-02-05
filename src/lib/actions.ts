@@ -2,8 +2,9 @@
 
 import { z } from 'zod';
 import { optimizeMetadata, type OptimizeMetadataInput } from '@/ai/flows/optimize-existing-metadata';
+import { generateMetadataFromScratch, type GenerateMetadataFromScratchInput } from '@/ai/flows/generate-metadata-from-scratch';
 import { parseMetadata } from '@/lib/metadata-utils';
-import type { AnalysisState, AnalysisResult } from '@/lib/types';
+import type { AnalysisState, GenerateState } from '@/lib/types';
 
 const UrlSchema = z.string().url({ message: 'Please enter a valid URL.' });
 
@@ -52,4 +53,26 @@ export async function optimizeMetadataAction(
 ): Promise<ReturnType<typeof optimizeMetadata>> {
   // Add validation here if needed
   return await optimizeMetadata(input);
+}
+
+
+export async function generateMetadataFromScratchAction(
+  prevState: GenerateState,
+  formData: FormData
+): Promise<GenerateState> {
+  const websiteDescription = formData.get('description');
+
+  if (!websiteDescription || typeof websiteDescription !== 'string' || websiteDescription.trim().length < 10) {
+    return { error: 'Please provide a more detailed description (at least 10 characters).' };
+  }
+  
+  const input: GenerateMetadataFromScratchInput = { websiteDescription };
+
+  try {
+    const result = await generateMetadataFromScratch(input);
+    return { data: result };
+  } catch(e) {
+    console.error(e);
+    return { error: 'Failed to generate metadata. Please try again.' };
+  }
 }

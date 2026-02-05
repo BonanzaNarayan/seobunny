@@ -1,3 +1,5 @@
+import type { GenerateMetadataFromScratchOutput } from "./ai/flows/generate-metadata-from-scratch";
+
 export interface AnalysisResult {
   title: string | null;
   description: string | null;
@@ -19,5 +21,10 @@ export interface AnalysisResult {
 
 export interface AnalysisState {
   data?: AnalysisResult;
+  error?: string;
+}
+
+export interface GenerateState {
+  data?: GenerateMetadataFromScratchOutput;
   error?: string;
 }
