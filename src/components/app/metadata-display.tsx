@@ -126,13 +126,13 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
                         {renderMetadataList(analysisResult)}
                     </TabsContent>
                     <TabsContent value="nextjs">
-                        <div className="relative rounded-md bg-muted/50 p-4 font-code text-sm">
+                        <div className="relative rounded-md bg-muted p-4 font-code text-sm">
                             <CopyButton textToCopy={originalNextJsCode} className="absolute top-2 right-2" />
                             <pre className="whitespace-pre-wrap break-all"><code>{originalNextJsCode}</code></pre>
                         </div>
                     </TabsContent>
                     <TabsContent value="html">
-                        <div className="relative rounded-md bg-muted/50 p-4 font-code text-sm">
+                        <div className="relative rounded-md bg-muted p-4 font-code text-sm">
                             <CopyButton textToCopy={originalHtmlCode} className="absolute top-2 right-2" />
                             <pre className="whitespace-pre-wrap break-all"><code>{originalHtmlCode}</code></pre>
                         </div>
@@ -178,13 +178,13 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
                         {renderMetadataList(optimizedListData)}
                     </TabsContent>
                     <TabsContent value="nextjs">
-                    <div className="relative rounded-md bg-muted/50 p-4 font-code text-sm">
+                    <div className="relative rounded-md bg-muted p-4 font-code text-sm">
                         <CopyButton textToCopy={optimizedNextJsCode} className="absolute top-2 right-2" />
                         <pre className="whitespace-pre-wrap break-all"><code>{optimizedNextJsCode}</code></pre>
                     </div>
                     </TabsContent>
                     <TabsContent value="html">
-                    <div className="relative rounded-md bg-muted/50 p-4 font-code text-sm">
+                    <div className="relative rounded-md bg-muted p-4 font-code text-sm">
                         <CopyButton textToCopy={optimizedHtmlCode} className="absolute top-2 right-2" />
                         <pre className="whitespace-pre-wrap break-all"><code>{optimizedHtmlCode}</code></pre>
                     </div>
