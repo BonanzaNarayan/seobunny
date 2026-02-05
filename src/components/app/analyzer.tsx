@@ -1,7 +1,6 @@
 'use client';
 
-import { useFormState } from 'react-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { Link, AlertCircle } from 'lucide-react';
 import { analyzeUrl, optimizeMetadataAction } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,7 @@ import { CardContent, CardFooter } from '../ui/card';
 const initialState: AnalysisState = {};
 
 export function Analyzer() {
-  const [state, formAction] = useFormState(analyzeUrl, initialState);
+  const [state, formAction] = useActionState(analyzeUrl, initialState);
   const [pending, setPending] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
