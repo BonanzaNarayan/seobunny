@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, FileJson, Download } from 'lucide-react';
+import { Sparkles, FileJson } from 'lucide-react';
 import type { AnalysisResult } from '@/lib/types';
 import type { OptimizeMetadataOutput, RateSeoOutput } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
@@ -81,13 +81,6 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
     URL.revokeObjectURL(url);
   }
 
-  const handleExportPdf = () => {
-    toast({
-        title: 'Coming Soon!',
-        description: 'PDF export functionality is under development.'
-    })
-  }
-
   const originalHtmlCode = formatAsHtml(analysisResult);
   const originalNextJsCode = formatAsNextJs(analysisResult);
   
@@ -140,9 +133,6 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
                     <div className="flex items-center gap-2">
                         <Button variant="outline" size="sm" onClick={() => handleExportJson(false)}>
                             <FileJson className="mr-2 h-4 w-4" /> Export JSON
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={handleExportPdf}>
-                            <Download className="mr-2 h-4 w-4" /> Export PDF
                         </Button>
                     </div>
                     </div>
@@ -203,9 +193,6 @@ export function MetadataDisplay({ analysisResult, onOptimize }: MetadataDisplayP
                             <div className="flex items-center gap-2">
                                 <Button variant="outline" size="sm" onClick={() => handleExportJson(true)}>
                                     <FileJson className="mr-2 h-4 w-4" /> Export JSON
-                                </Button>
-                                <Button variant="outline" size="sm" onClick={handleExportPdf}>
-                                    <Download className="mr-2 h-4 w-4" /> Export PDF
                                 </Button>
                             </div>
                             </div>
