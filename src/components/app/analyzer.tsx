@@ -11,6 +11,7 @@ import type { AnalysisState } from '@/lib/types';
 import { ResultSkeleton } from './result-skeletons';
 import type { OptimizeMetadataOutput, RateSeoOutput } from '@/ai/schemas';
 import { CardContent, CardFooter } from '../ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 const initialState: AnalysisState = {};
 
@@ -22,6 +23,7 @@ type OptimizationResult = {
 export function Analyzer() {
   const [state, formAction, isPending] = useActionState(analyzeUrl, initialState);
   const formRef = useRef<HTMLFormElement>(null);
+  const { toast } = useToast();
 
   const handleOptimize = async (input: { title: string, description: string, keywords: string }): Promise<OptimizationResult | undefined> => {
     try {
@@ -33,7 +35,12 @@ export function Analyzer() {
         return result;
     } catch(e) {
         console.error("Optimization failed", e);
-        // Optionally show a toast notification for failure
+        const errorMessage = e instanceof Error ? e.message : "An unknown error occurred during optimization.";
+        toast({
+            variant: "destructive",
+            title: "Optimization Failed",
+            description: errorMessage,
+        });
         return undefined;
     }
   }

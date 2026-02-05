@@ -16,17 +16,14 @@ export async function analyzeUrl(
 ): Promise<AnalysisState> {
   const url = formData.get('url');
 
-  const validatedUrl = UrlSchema.safeParse(url);
-  if (!validatedUrl.success) {
-    return { error: validatedUrl.error.errors[0].message };
-  }
-
-  let fullUrl = validatedUrl.data;
-  if (!fullUrl.startsWith('http')) {
-    fullUrl = `https://${fullUrl}`;
-  }
-
   try {
+    const validatedUrl = UrlSchema.parse(url);
+    
+    let fullUrl = validatedUrl;
+    if (!fullUrl.startsWith('http')) {
+      fullUrl = `https://${fullUrl}`;
+    }
+
     const response = await fetch(fullUrl, {
         headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
@@ -52,10 +49,13 @@ export async function analyzeUrl(
     return { data: metadata };
   } catch (e) {
     console.error(e);
-    if (e instanceof Error && e.message.includes('invalid URL')) {
-        return { error: 'Invalid URL format. Please check and try again.' };
+    if (e instanceof z.ZodError) {
+        return { error: e.errors[0].message };
     }
-    return { error: 'Could not connect to the URL. Please check the address and your connection.' };
+    if (e instanceof Error) {
+      return { error: e.message };
+    }
+    return { error: 'An unexpected error occurred during analysis.' };
   }
 }
 
@@ -78,13 +78,13 @@ export async function generateMetadataFromScratchAction(
 ): Promise<GenerateState> {
   const websiteDescription = formData.get('description');
 
-  if (!websiteDescription || typeof websiteDescription !== 'string' || websiteDescription.trim().length < 10) {
-    return { error: 'Please provide a more detailed description (at least 10 characters).' };
-  }
-  
-  const input: GenerateMetadataFromScratchInput = { websiteDescription };
-
   try {
+    if (!websiteDescription || typeof websiteDescription !== 'string' || websiteDescription.trim().length < 10) {
+      throw new Error('Please provide a more detailed description (at least 10 characters).');
+    }
+    
+    const input: GenerateMetadataFromScratchInput = { websiteDescription };
+
     const metadata = await generateMetadataFromScratch(input);
     const rating = await rateSeo({
       title: metadata.titleTag,
@@ -94,6 +94,9 @@ export async function generateMetadataFromScratchAction(
     return { data: { metadata, rating } };
   } catch(e) {
     console.error(e);
+    if (e instanceof Error) {
+        return { error: e.message };
+    }
     return { error: 'Failed to generate metadata. Please try again.' };
   }
 }
