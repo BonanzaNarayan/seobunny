@@ -17,14 +17,18 @@ export async function analyzeUrl(
   const url = formData.get('url');
 
   try {
-    const validatedUrl = UrlSchema.parse(url);
-    
-    let fullUrl = validatedUrl;
-    if (!fullUrl.startsWith('http')) {
+    if (!url || typeof url !== 'string') {
+        return { error: 'Please enter a valid URL.' };
+    }
+
+    let fullUrl = url;
+    if (!/^(https?:\/\/)/i.test(fullUrl)) {
       fullUrl = `https://${fullUrl}`;
     }
 
-    const response = await fetch(fullUrl, {
+    const validatedUrl = UrlSchema.parse(fullUrl);
+    
+    const response = await fetch(validatedUrl, {
         headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
         },
