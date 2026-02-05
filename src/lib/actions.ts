@@ -1,11 +1,12 @@
 'use server';
 
 import { z } from 'zod';
-import { optimizeMetadata, type OptimizeMetadataInput } from '@/ai/flows/optimize-existing-metadata';
-import { generateMetadataFromScratch, type GenerateMetadataFromScratchInput } from '@/ai/flows/generate-metadata-from-scratch';
+import { optimizeMetadata } from '@/ai/flows/optimize-existing-metadata';
+import { generateMetadataFromScratch } from '@/ai/flows/generate-metadata-from-scratch';
 import { rateSeo } from '@/ai/flows/rate-seo-flow';
 import { parseMetadata } from '@/lib/metadata-utils';
 import type { AnalysisState, GenerateState } from '@/lib/types';
+import type { GenerateMetadataFromScratchInput, OptimizeMetadataInput } from '@/ai/schemas';
 
 const UrlSchema = z.string().url({ message: 'Please enter a valid URL.' });
 

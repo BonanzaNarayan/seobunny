@@ -1,5 +1,4 @@
-import type { GenerateMetadataFromScratchOutput } from "./ai/flows/generate-metadata-from-scratch";
-import type { RateSeoOutput } from "./ai/flows/rate-seo-flow";
+import type { GenerateMetadataFromScratchOutput, RateSeoOutput } from "@/ai/schemas";
 
 export interface AnalysisResult {
   title: string | null;

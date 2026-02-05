@@ -4,30 +4,15 @@
  * @fileOverview An AI agent that optimizes existing metadata for SEO performance.
  *
  * - optimizeMetadata - A function that optimizes the given metadata.
- * - OptimizeMetadataInput - The input type for the optimizeMetadata function.
- * - OptimizeMetadataOutput - The return type for the optimizeMetadata function.
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-
-const OptimizeMetadataInputSchema = z.object({
-  titleTag: z.string().describe('The existing title tag to optimize.'),
-  metaDescription: z
-    .string()
-    .describe('The existing meta description to optimize.'),
-  keywords: z.string().describe('The existing keywords to optimize.'),
-});
-export type OptimizeMetadataInput = z.infer<typeof OptimizeMetadataInputSchema>;
-
-const OptimizeMetadataOutputSchema = z.object({
-  optimizedTitleTag: z.string().describe('The optimized title tag.'),
-  optimizedMetaDescription: z
-    .string()
-    .describe('The optimized meta description.'),
-  optimizedKeywords: z.string().describe('The optimized keywords.'),
-});
-export type OptimizeMetadataOutput = z.infer<typeof OptimizeMetadataOutputSchema>;
+import {
+  OptimizeMetadataInputSchema,
+  type OptimizeMetadataInput,
+  OptimizeMetadataOutputSchema,
+  type OptimizeMetadataOutput,
+} from '@/ai/schemas';
 
 export async function optimizeMetadata(
   input: OptimizeMetadataInput

@@ -3,28 +3,15 @@
 /**
  * @fileOverview An AI agent that rates SEO metadata and provides feedback.
  * - rateSeo - A function that rates the given metadata.
- * - RateSeoInput - The input type for the rateSeo function.
- * - RateSeoOutput - The return type for the rateSeo function.
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-
-const RateSeoInputSchema = z.object({
-  title: z.string().describe('The title tag of the webpage.'),
-  description: z.string().describe('The meta description of the webpage.'),
-  keywords: z.string().optional().describe('The keywords for the webpage.'),
-});
-export type RateSeoInput = z.infer<typeof RateSeoInputSchema>;
-
-const RateSeoOutputSchema = z.object({
-  score: z.number().min(0).max(100).describe('The SEO score from 0 to 100.'),
-  rating: z
-    .string()
-    .describe('A one-word rating like "Excellent", "Good", "Average", "Poor".'),
-  feedback: z.string().describe('Actionable feedback to improve the SEO score.'),
-});
-export type RateSeoOutput = z.infer<typeof RateSeoOutputSchema>;
+import {
+  RateSeoInputSchema,
+  type RateSeoInput,
+  RateSeoOutputSchema,
+  type RateSeoOutput,
+} from '@/ai/schemas';
 
 export async function rateSeo(input: RateSeoInput): Promise<RateSeoOutput> {
   return rateSeoFlow(input);

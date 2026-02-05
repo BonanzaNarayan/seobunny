@@ -9,8 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { MetadataDisplay } from './metadata-display';
 import type { AnalysisState } from '@/lib/types';
 import { ResultSkeleton } from './result-skeletons';
-import type { OptimizeMetadataOutput } from '@/ai/flows/optimize-existing-metadata';
-import type { RateSeoOutput } from '@/ai/flows/rate-seo-flow';
+import type { OptimizeMetadataOutput, RateSeoOutput } from '@/ai/schemas';
 import { CardContent, CardFooter } from '../ui/card';
 
 const initialState: AnalysisState = {};

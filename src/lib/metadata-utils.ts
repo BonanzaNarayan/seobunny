@@ -1,5 +1,5 @@
 import type { AnalysisResult } from '@/lib/types';
-import type { OptimizeMetadataOutput } from '@/ai/flows/optimize-existing-metadata';
+import type { OptimizeMetadataOutput } from '@/ai/schemas';
 
 // Basic regex parsers - not robust for production but sufficient for this demo.
 const extract = (html: string, regex: RegExp): string | null => {

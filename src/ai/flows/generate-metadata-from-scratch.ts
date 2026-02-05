@@ -3,34 +3,15 @@
 /**
  * @fileOverview An AI agent that generates SEO metadata from scratch based on a website description.
  * - generateMetadataFromScratch - A function that generates metadata.
- * - GenerateMetadataFromScratchInput - The input type.
- * - GenerateMetadataFromScratchOutput - The return type.
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-
-const GenerateMetadataFromScratchInputSchema = z.object({
-  websiteDescription: z
-    .string()
-    .describe('A description of the website to generate metadata for.'),
-});
-export type GenerateMetadataFromScratchInput = z.infer<
-  typeof GenerateMetadataFromScratchInputSchema
->;
-
-const GenerateMetadataFromScratchOutputSchema = z.object({
-  titleTag: z.string().describe('The generated title tag.'),
-  metaDescription: z.string().describe('The generated meta description.'),
-  keywords: z.string().describe('A comma-separated list of relevant keywords.'),
-  ogTitle: z.string().describe('The generated Open Graph title.'),
-  ogDescription: z.string().describe('The generated Open Graph description.'),
-  twitterTitle: z.string().describe('The generated Twitter title.'),
-  twitterDescription: z.string().describe('The generated Twitter description.'),
-});
-export type GenerateMetadataFromScratchOutput = z.infer<
-  typeof GenerateMetadataFromScratchOutputSchema
->;
+import {
+  GenerateMetadataFromScratchInputSchema,
+  type GenerateMetadataFromScratchInput,
+  GenerateMetadataFromScratchOutputSchema,
+  type GenerateMetadataFromScratchOutput,
+} from '@/ai/schemas';
 
 export async function generateMetadataFromScratch(
   input: GenerateMetadataFromScratchInput

@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { Sparkles, FileJson, Download } from 'lucide-react';
 import type { AnalysisResult } from '@/lib/types';
-import type { OptimizeMetadataOutput } from '@/ai/flows/optimize-existing-metadata';
-import type { RateSeoOutput } from '@/ai/flows/rate-seo-flow';
+import type { OptimizeMetadataOutput, RateSeoOutput } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
