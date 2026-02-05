@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useRef, useState } from 'react';
+import { useActionState, useRef } from 'react';
 import { Link, AlertCircle } from 'lucide-react';
 import { analyzeUrl, optimizeMetadataAction } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
@@ -15,20 +15,8 @@ import { CardContent, CardFooter } from '../ui/card';
 const initialState: AnalysisState = {};
 
 export function Analyzer() {
-  const [state, formAction] = useActionState(analyzeUrl, initialState);
-  const [pending, setPending] = useState(false);
+  const [state, formAction, isPending] = useActionState(analyzeUrl, initialState);
   const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    setPending(false);
-  }, [state]);
-
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setPending(true);
-    const formData = new FormData(event.currentTarget);
-    formAction(formData);
-  };
 
   const handleOptimize = async (input: { title: string, description: string, keywords: string }): Promise<OptimizeMetadataOutput | undefined> => {
     try {
@@ -47,7 +35,7 @@ export function Analyzer() {
 
   return (
     <div>
-        <form ref={formRef} onSubmit={handleFormSubmit}>
+        <form ref={formRef} action={formAction}>
             <CardContent className="p-6">
                 <div className="relative">
                     <Link className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -67,15 +55,15 @@ export function Analyzer() {
                 )}
             </CardContent>
             <CardFooter className="bg-muted/50 p-4 border-t">
-                <Button type="submit" className="w-full" disabled={pending}>
-                    {pending ? 'Analyzing...' : 'Analyze URL'}
+                <Button type="submit" className="w-full" disabled={isPending}>
+                    {isPending ? 'Analyzing...' : 'Analyze URL'}
                 </Button>
             </CardFooter>
         </form>
 
       <div className="p-6">
-        {pending && <ResultSkeleton />}
-        {!pending && state.data && (
+        {isPending && <ResultSkeleton />}
+        {!isPending && state.data && (
             <MetadataDisplay analysisResult={state.data} onOptimize={handleOptimize} />
         )}
       </div>
