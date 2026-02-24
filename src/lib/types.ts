@@ -1,5 +1,3 @@
-import type { GenerateMetadataFromScratchOutput, RateSeoOutput } from "@/ai/schemas";
-
 export interface AnalysisResult {
   title: string | null;
   description: string | null;
@@ -17,18 +15,9 @@ export interface AnalysisResult {
   robots: string | null;
   // Basic structured data as a string for display
   structuredData: string | null; 
-  rating?: RateSeoOutput;
 }
 
 export interface AnalysisState {
   data?: AnalysisResult;
-  error?: string;
-}
-
-export interface GenerateState {
-  data?: {
-    metadata: GenerateMetadataFromScratchOutput;
-    rating: RateSeoOutput;
-  };
   error?: string;
 }

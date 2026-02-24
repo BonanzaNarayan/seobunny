@@ -17,9 +17,6 @@ export function AppHeader() {
                 <Button variant={pathname === '/' ? 'default' : 'secondary'} asChild>
                     <Link href="/">Analyze</Link>
                 </Button>
-                <Button variant={pathname === '/build' ? 'default' : 'secondary'} asChild>
-                    <Link href="/build">Build</Link>
-                </Button>
             </nav>
         </header>
     )

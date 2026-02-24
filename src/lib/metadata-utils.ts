@@ -1,5 +1,4 @@
 import type { AnalysisResult } from '@/lib/types';
-import type { OptimizeMetadataOutput } from '@/ai/schemas';
 
 // Basic regex parsers - not robust for production but sufficient for this demo.
 const extract = (html: string, regex: RegExp): string | null => {
@@ -30,26 +29,6 @@ export function parseMetadata(html: string): AnalysisResult {
   };
 }
 
-function generateCombinedMetadata(
-  original: AnalysisResult,
-  optimized?: OptimizeMetadataOutput
-): AnalysisResult {
-  if (!optimized) return original;
-  
-  return {
-    ...original,
-    title: optimized.optimizedTitleTag || original.title,
-    description: optimized.optimizedMetaDescription || original.description,
-    keywords: optimized.optimizedKeywords || original.keywords,
-    // Carry over OG/Twitter, but update with optimized values if they were missing initially
-    ogTitle: original.ogTitle || optimized.optimizedTitleTag,
-    ogDescription: original.ogDescription || optimized.optimizedMetaDescription,
-    twitterTitle: original.twitterTitle || optimized.optimizedTitleTag,
-    twitterDescription: original.twitterDescription || optimized.optimizedMetaDescription,
-  };
-}
-
-
 function generateTag(key: string, value: string | null, isProperty = false) {
   if (!value) return null;
   const attr = isProperty ? 'property' : 'name';
@@ -61,9 +40,7 @@ function generateLink(rel: string, href: string | null) {
   return `<link rel="${rel}" href="${href}">`;
 }
 
-export function formatAsHtml(original: AnalysisResult, optimized?: OptimizeMetadataOutput): string {
-  const data = generateCombinedMetadata(original, optimized);
-  
+export function formatAsHtml(data: AnalysisResult): string {
   const tags = [
     data.title ? `<title>${data.title}</title>` : null,
     generateTag('description', data.description),
@@ -88,9 +65,7 @@ export function formatAsHtml(original: AnalysisResult, optimized?: OptimizeMetad
   return tags.join('\n');
 }
 
-export function formatAsNextJs(original: AnalysisResult, optimized?: OptimizeMetadataOutput): string {
-  const data = generateCombinedMetadata(original, optimized);
-
+export function formatAsNextJs(data: AnalysisResult): string {
   const metadataObject = {
     title: data.title,
     description: data.description,
